@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>瑙嗛妫嬬被瀵规垬</title>
+<meta name="theme-color" content="#1c1510" />
+<!--
+  姘镐箙鍏ュ彛椤碉紙鍙渶瑕佹彁浜よ繖涓€涓枃浠讹級銆?
+  涓轰粈涔堣繖鏍疯璁★細
+    鍏嶈垂闅ч亾姣忔閲嶅惎閮芥崲鍩熷悕锛屾墍浠ヤ簩缁寸爜涓嶈兘鐩存帴鍗伴毀閬撳湴鍧€銆?    杩欎釜椤甸潰鏀惧湪鍥哄畾鐨?GitHub Pages 涓婏紝姣忔鍘?ntfy 鎷?褰撳墠闅ч亾鍦板潃"
+    锛堟埧涓荤數鑴戝湪闅ч亾鍙樺寲鏃惰嚜鍔ㄥ彂甯冿紝涓嶉渶瑕佷换浣曡璇侊級銆?  鎵€浠ヤ簩缁寸爜姘镐箙鏈夋晥锛屾埧涓荤數鑴戝紑鐫€灏辫兘杩涘幓銆?
+  涓夐噸鍏滃簳锛歯tfy 鈫?current.json 鈫?LASTRESORT
+-->
+<style>
+  html,body{margin:0;height:100%}
+  body{
+    background:radial-gradient(900px 520px at 50% 0%,#3a2a1b,#1c1510 62%);
+    color:#f2e7d5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;
+  }
+  .box{max-width:420px}
+  .sp{width:34px;height:34px;margin:0 auto 18px;border:3px solid rgba(217,164,65,.28);
+      border-top-color:#d9a441;border-radius:50%;animation:s .9s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  h1{font-size:18px;margin:0 0 10px;font-weight:600}
+  p{font-size:13.5px;line-height:1.8;color:#a9967c;margin:0 0 8px}
+  a{display:inline-block;margin-top:14px;padding:11px 22px;background:#d9a441;color:#241608;
+    text-decoration:none;border-radius:10px;font-weight:600;font-size:14px}
+  .off{color:#e0a08a;margin-top:16px}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="sp" id="sp"></div>
+  <h1 id="t">姝ｅ湪杩涘叆妫嬪眬鈥?/h1>
+  <p id="p">濡傛灉 3 绉掑悗娌″弽搴旓紝鐐逛笅闈㈢殑鎸夐挳</p>
+  <a id="go" href="#">鎵嬪姩杩涘叆</a>
+  <p class="off hide" id="off">鎵撲笉寮€閫氬父璇存槑<b>鎴夸富鐨勭數鑴戞病寮€</b>銆?br />绋嶇瓑鍑犲垎閽熷啀璇曪紝鎴栬鎴夸富寮€鏈恒€?/p>
+</div>
+<script>
+(function(){
+  // 鎴夸富鐢佃剳浼氬線杩欎釜 ntfy 涓婚鍙戝竷褰撳墠闅ч亾鍦板潃锛堟棤闇€璁よ瘉锛屼笖鍏佽璺ㄥ煙璇诲彇锛?  var TOPIC = 'zuo1783-gobang-8f3k2';
+  var LASTRESORT = '';   // 鏋佺鎯呭喌涓嬬殑鍏滃簳锛堝彲涓虹┖锛?
+  var go = document.getElementById('go');
+  var off = document.getElementById('off');
+  var tEl = document.getElementById('t');
+  var pEl = document.getElementById('p');
+
+  function ok(u){ return /^https?:\/\//i.test(u) ? u : ''; }
+
+  function jump(u){
+    u = ok(u) || LASTRESORT;
+    if(!u){ fail(); return; }
+    go.href = u;
+    try { location.replace(u); } catch(e) { /* 浜ょ粰鎵嬪姩鎸夐挳 */ }
+  }
+
+  function fail(){
+    document.getElementById('sp').classList.add('hide');
+    tEl.textContent = '鏆傛椂杩涗笉鍘?;
+    pEl.textContent = '鐐逛笅闈㈢殑鎸夐挳鍐嶈瘯涓€娆?;
+    off.classList.remove('hide');
+  }
+
+  function withTimeout(pr, ms){
+    return Promise.race([pr, new Promise(function(_,rej){
+      setTimeout(function(){ rej(new Error('timeout')); }, ms);
+    })]);
+  }
+
+  // 1) 鍏堥棶 ntfy 瑕佹渶鏂伴毀閬撳湴鍧€
+  var ntfy = 'https://ntfy.sh/' + TOPIC + '/raw?poll=1&since=all';
+  withTimeout(fetch(ntfy, { cache: 'no-store' }).then(function(r){ return r.ok ? r.text() : ''; }), 6000)
+    .then(function(txt){
+      var lines = String(txt || '').split(/\r?\n/).filter(function(x){ return /^https?:\/\//i.test(x.trim()); });
+      if (lines.length) { jump(lines[lines.length - 1].trim()); return; }
+      throw new Error('empty');
+    })
+    .catch(function(){
+      // 2) 鍐嶈瘯鍚岀洰褰曠殑 current.json
+      withTimeout(fetch('current.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(function(r){ return r.ok ? r.json() : null; }), 4000)
+        .then(function(j){ jump((j && j.url) || ''); })
+        .catch(function(){ jump(''); });
+    });
+
+  // 3) 3 绉掑悗杩樺仠鍦ㄨ繖锛岀粰鍑虹敤鎴风湅寰楁噦鐨勬彁绀?  setTimeout(function(){
+    if (document.visibilityState !== 'hidden' && go.getAttribute('href') === '#') fail();
+  }, 3000);
+})();
+</script>
+</body>
+</html>
